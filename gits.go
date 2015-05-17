@@ -32,18 +32,15 @@ func NewService(cfg *Config) *GitService {
 	return gs
 }
 
-func createRepo(path string) pipe.Pipe {
+func createRepoCmd(path string) pipe.Pipe {
+	fmt.Println(path)
 	cmd := []string{"git", "init", "--bare"}
-	p := pipe.Line(pipe.ChDir(path), pipe.Exec(cmd[0], cmd[1:]...))
+	p := pipe.Script(pipe.MkdirAll(path, 0777), pipe.ChDir(path), pipe.Exec(cmd[0], cmd[1:]...))
 	return p
 }
 
 func (gs *GitService) CreateRepo(repo string, user *User) (string, error) {
 	fullPath := path.Join(gs.Path, user.Name, repo+".git")
-	fmt.Println(fullPath)
-	err := os.MkdirAll(fullPath, 0777)
-	p := createRepo(fullPath)
-	output, err := pipe.CombinedOutput(p)
-	fmt.Println(string(output))
+	output, err := pipe.CombinedOutput(createRepoCmd(fullPath))
 	return "file://" + fullPath, err
 }
