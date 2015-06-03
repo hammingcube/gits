@@ -42,7 +42,7 @@ func createRepoScript(path string) pipe.Pipe {
 	return p
 }
 
-func addToRepoScript(files map[string][]byte, repo string) pipe.Pipe {
+func writeFilesScript(files map[string][]byte) pipe.Pipe {
 	pipes := []pipe.Pipe{}
 	for filename, blob := range files {
 		p := pipe.Line(
@@ -52,6 +52,14 @@ func addToRepoScript(files map[string][]byte, repo string) pipe.Pipe {
 		pipes = append(pipes, p)
 	}
 	p := pipe.Script(pipes...)
+	return p
+}
+
+func addToRepoScript(files map[string][]byte, dest string) pipe.Pipe {
+	p := pipe.Script(
+		pipe.ChDir(dest),
+		writeFilesScript(files),
+	)
 	return p
 }
 

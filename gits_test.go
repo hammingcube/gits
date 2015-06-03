@@ -17,8 +17,9 @@ func TestCreate(t *testing.T) {
 func TestFiles(t *testing.T) {
 	m := map[string][]byte{
 		"abc.txt": []byte("Hello\n"),
-		"pqr.txt": []byte("New stuff\n")}
-	p := addToRepoScript(m, "abc.git")
+		"pqr.txt": []byte("New stuff\n"),
+	}
+	p := addToRepoScript(m, "data")
 	output, _ := pipe.CombinedOutput(p)
 	fmt.Println(string(output))
 }
