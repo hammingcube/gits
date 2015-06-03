@@ -19,7 +19,7 @@ func TestFiles(t *testing.T) {
 		"abc.txt": []byte("Hello\n"),
 		"pqr.txt": []byte("New stuff\n"),
 	}
-	p := addToRepoScript(m, "data")
+	p := addToRepoScript(m, "file:///Users/mjha/git/data/maddy/tempting.git", "cool")
 	output, _ := pipe.CombinedOutput(p)
 	fmt.Println(string(output))
 }

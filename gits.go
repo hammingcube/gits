@@ -42,8 +42,8 @@ func createRepoScript(path string) pipe.Pipe {
 	return p
 }
 
-func writeFilesScript(files map[string][]byte) pipe.Pipe {
-	pipes := []pipe.Pipe{}
+func writeFilesScript(files map[string][]byte, dest string) pipe.Pipe {
+	pipes := []pipe.Pipe{pipe.ChDir(dest)}
 	for filename, blob := range files {
 		p := pipe.Line(
 			pipe.Read(bytes.NewReader(blob)),
@@ -55,10 +55,24 @@ func writeFilesScript(files map[string][]byte) pipe.Pipe {
 	return p
 }
 
-func addToRepoScript(files map[string][]byte, dest string) pipe.Pipe {
-	p := pipe.Script(
+func cloneRepoScript(repo, dest string) pipe.Pipe {
+	return pipe.Exec("git", "clone", repo, dest)
+}
+
+func commitAllScript(dest string) pipe.Pipe {
+	return pipe.Script(
 		pipe.ChDir(dest),
-		writeFilesScript(files),
+		pipe.Exec("git", "add", "."),
+		pipe.Exec("git", "commit", "-m", "More updates"),
+		pipe.Exec("git", "push", "-u", "origin", "master"),
+	)
+}
+
+func addToRepoScript(files map[string][]byte, repo string, dest string) pipe.Pipe {
+	p := pipe.Script(
+		cloneRepoScript(repo, dest),
+		writeFilesScript(files, dest),
+		commitAllScript(dest),
 	)
 	return p
 }
