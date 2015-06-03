@@ -50,10 +50,3 @@ func (gs *GitService) CreateRepo(repo string, user *User) (string, error) {
 	return "file://" + fullPath, err
 }
 
-func (gs *GitService) AddRepo(repo string, user *User) (string, error) {
-	fullPath := path.Join(gs.Path, user.Name, repo+".git")
-	p := createRepoScript(fullPath)
-	output, err := pipe.CombinedOutput(p)
-	fmt.Println(string(output))
-	return "file://" + fullPath, err
-}
