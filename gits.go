@@ -1,6 +1,7 @@
 package gits
 
 import (
+	"bytes"
 	"fmt"
 	"gopkg.in/pipe.v2"
 	_ "os"
@@ -41,6 +42,18 @@ func createRepoScript(path string) pipe.Pipe {
 	return p
 }
 
+func addToRepoScript(files map[string][]byte, repo string) pipe.Pipe {
+	pipes := []pipe.Pipe{}
+	for filename, blob := range files {
+		p := pipe.Line(
+			pipe.Read(bytes.NewReader(blob)),
+			pipe.WriteFile(filename, 0644),
+		)
+		pipes = append(pipes, p)
+	}
+	p := pipe.Script(pipes...)
+	return p
+}
 
 func (gs *GitService) CreateRepo(repo string, user *User) (string, error) {
 	fullPath := path.Join(gs.Path, user.Name, repo+".git")
@@ -49,4 +62,3 @@ func (gs *GitService) CreateRepo(repo string, user *User) (string, error) {
 	fmt.Println(string(output))
 	return "file://" + fullPath, err
 }
-
