@@ -1,7 +1,7 @@
 package gits
 
 import "testing"
-import "gopkg.in/pipe.v2"
+import _ "gopkg.in/pipe.v2"
 import "fmt"
 
 const REPO = "file:///Users/mjha/git/data/maddy/tempting.git"
@@ -17,18 +17,18 @@ func _TestCreate(t *testing.T) {
 	}
 }
 
-func Test1(t *testing.T) {
+func _Test1(t *testing.T) {
 	gs := NewService(&Config{ServerPath: "/Users/mjha/git/data"})
 	err := gs.PrepareRepo(REPO, DEST)
 	fmt.Println(err)
 }
 
-func _TestFiles(t *testing.T) {
-	m := map[string][]byte{
-		"abc.txt": []byte("Hello\n"),
+func TestFiles(t *testing.T) {
+	gs := NewService(&Config{ServerPath: "/Users/mjha/git/data"})
+	files := map[string][]byte{
+		"abc.txt": []byte("Hello\nHow do you do?\n"),
 		"pqr.txt": []byte("New stuff\n"),
+		"uvw.txt": []byte("Totally new file\n"),
 	}
-	p := addToRepoScript(m, "file:///Users/mjha/git/data/maddy/tempting.git", "cool")
-	output, _ := pipe.CombinedOutput(p)
-	fmt.Println(string(output))
+	gs.AddToRepo("tempting", &User{"123", "maddy"}, files)
 }

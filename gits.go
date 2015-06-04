@@ -124,8 +124,22 @@ func (gs *GitService) PrepareRepo(repo string, dest string) error {
 	return err
 }
 
+func (gs *GitService) AddToRepo(repo string, user *User, files map[string][]byte) (string, error) {
+	dest := "coolnew"
+	repoURL := "file://" + gs.RepoFullPath(repo, user)
+	gs.PrepareRepo(repoURL, dest)
+	p := addToRepoScript(files, repoURL, dest)
+	output, err := pipe.CombinedOutput(p)
+	fmt.Println(string(output))
+	return repoURL, err
+}
+
+func (gs *GitService) RepoFullPath(repo string, user *User) string {
+	return path.Join(gs.Path, user.Name, repo+".git")
+}
+
 func (gs *GitService) CreateRepo(repo string, user *User) (string, error) {
-	fullPath := path.Join(gs.Path, user.Name, repo+".git")
+	fullPath := gs.RepoFullPath(repo, user)
 	p := createRepoScript(fullPath)
 	output, err := pipe.CombinedOutput(p)
 	fmt.Println(string(output))
