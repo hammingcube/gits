@@ -4,8 +4,9 @@ import (
 	"bytes"
 	"fmt"
 	"gopkg.in/pipe.v2"
-	_ "os"
+	"os"
 	"path"
+	"strings"
 )
 
 type User struct {
@@ -56,7 +57,8 @@ func writeFilesScript(files map[string][]byte, dest string) pipe.Pipe {
 }
 
 func cloneRepoScript(repo, dest string) pipe.Pipe {
-	return pipe.Exec("git", "clone", repo, dest)
+	p := pipe.Exec("git", "clone", repo, dest)
+	return p
 }
 
 func commitAllScript(dest string) pipe.Pipe {
@@ -70,11 +72,56 @@ func commitAllScript(dest string) pipe.Pipe {
 
 func addToRepoScript(files map[string][]byte, repo string, dest string) pipe.Pipe {
 	p := pipe.Script(
-		cloneRepoScript(repo, dest),
 		writeFilesScript(files, dest),
 		commitAllScript(dest),
 	)
 	return p
+}
+
+func exists(path string) (bool, error) {
+	_, err := os.Stat(path)
+	if err == nil {
+		return true, nil
+	}
+	if os.IsNotExist(err) {
+		return false, nil
+	}
+	return false, err
+}
+
+func checkStatus(dest string) (bool, error) {
+	p := pipe.Script(
+		pipe.ChDir(dest),
+		pipe.Exec("git", "status"),
+	)
+	output, err := pipe.CombinedOutput(p)
+	fmt.Println(string(output))
+	if err != nil {
+		return false, err
+	}
+	if strings.Contains(string(output), "Your branch is up-to-date") {
+		return true, nil
+	} else {
+		return false, nil
+	}
+}
+
+func (gs *GitService) PrepareRepo(repo string, dest string) error {
+	ok, err := exists(dest)
+	if err != nil {
+		return err
+	}
+	if ok {
+		if good, err := checkStatus(dest); err != nil {
+			return err
+		} else if good {
+			return nil
+		}
+	}
+	err = os.RemoveAll(dest)
+	output, err := pipe.CombinedOutput(cloneRepoScript(repo, dest))
+	fmt.Println(string(output))
+	return err
 }
 
 func (gs *GitService) CreateRepo(repo string, user *User) (string, error) {

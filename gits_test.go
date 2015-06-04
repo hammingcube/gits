@@ -4,7 +4,10 @@ import "testing"
 import "gopkg.in/pipe.v2"
 import "fmt"
 
-func TestCreate(t *testing.T) {
+const REPO = "file:///Users/mjha/git/data/maddy/tempting.git"
+const DEST = "cool"
+
+func _TestCreate(t *testing.T) {
 	gs := NewService(&Config{ServerPath: "/Users/mjha/git/data"})
 	url, err := gs.CreateRepo("tempting", &User{"123", "maddy"})
 	want := "file:///Users/mjha/git/data/maddy/tempting.git"
@@ -14,7 +17,13 @@ func TestCreate(t *testing.T) {
 	}
 }
 
-func TestFiles(t *testing.T) {
+func Test1(t *testing.T) {
+	gs := NewService(&Config{ServerPath: "/Users/mjha/git/data"})
+	err := gs.PrepareRepo(REPO, DEST)
+	fmt.Println(err)
+}
+
+func _TestFiles(t *testing.T) {
 	m := map[string][]byte{
 		"abc.txt": []byte("Hello\n"),
 		"pqr.txt": []byte("New stuff\n"),
